@@ -1,0 +1,53 @@
+version: '3.8'
+
+services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_API_URL=http://backend:3001
+      - NEXT_PUBLIC_SITE_URL=http://localhost:3000
+    depends_on:
+      - backend
+    networks:
+      - energyworld-network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+      - MONGODB_URI=mongodb://mongo:27017/energyworld
+      - EMAIL_HOST=smtp.gmail.com
+      - EMAIL_PORT=587
+      - EMAIL_USER=energyworld.uae@gmail.com
+      - EMAIL_PASS=${EMAIL_PASS}
+      - EMAIL_FROM=energyworld.uae@gmail.com
+    depends_on:
+      - mongo
+    networks:
+      - energyworld-network
+
+  mongo:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - energyworld-network
+
+volumes:
+  mongo_data:
+
+networks:
+  energyworld-network:
+    driver: bridge 
